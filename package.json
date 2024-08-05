@@ -12,10 +12,28 @@
   "activationEvents": [],
   "main": "./extension.js",
   "contributes": {
-    "commands": [{
-      "command": "llmproject.helloWorld",
-      "title": "Hello World"
-    }]
+    "commands": [
+      {
+        "command": "llmproject.copyFilePathAndContent",
+        "title": "Copy File Path and Content"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "llmproject.copyFilePathAndContent",
+        "key": "ctrl+shift+c",
+        "when": "editorTextFocus"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "llmproject.copyFilePathAndContent",
+          "when": "resourceScheme == 'file'",
+          "group": "9_cutcopypaste"
+        }
+      ]
+    }
   },
   "scripts": {
     "lint": "eslint .",

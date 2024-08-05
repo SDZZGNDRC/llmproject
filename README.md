@@ -1,65 +1,54 @@
-# llmproject README
+# LLMProject
 
-This is the README for your extension "llmproject". After writing up a brief description, we recommend including the following sections.
+LLMProject is a Visual Studio Code extension designed to enhance your development workflow by allowing you to quickly copy the file path and content of the currently opened file. This feature is particularly useful for generating context when using Large Language Models (LLMs) to boost your development process.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Copy File Path and Content**: Easily copy the relative file path and its content in a formatted way to the clipboard.
+- **Markdown Code Blocks**: Automatically formats the file content in a Markdown code block based on the file's extension.
+- **Context Menu Integration**: Access the command directly from the context menu in the Explorer view.
 
-For example if there is an image subfolder under your extension project workspace:
+## Installation
 
-\!\[feature X\]\(images/feature-x.png\)
+1. Open Visual Studio Code.
+2. Go to the Extensions view by clicking on the Extensions icon in the Activity Bar on the side of the window or pressing `Ctrl+Shift+X`.
+3. Search for `LLMProject` and click on the Install button.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Usage
 
-## Requirements
+### Command Palette
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+1. Open the Command Palette by pressing `Ctrl+Shift+P`.
+2. Type `Copy File Path and Content` and select the command.
 
-## Extension Settings
+### Keybinding
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+You can also use the keybinding:
+- **Windows/Linux**: `Ctrl+Shift+C`
+- **Mac**: `Cmd+Shift+C`
 
-For example:
+This keybinding will copy the relative path and content of the currently active file to the clipboard.
 
-This extension contributes the following settings:
+### Context Menu
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+Right-click on any file in the Explorer view and select `Copy File Path and Content` to copy the file path and content.
 
-## Known Issues
+## Configuration
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+No additional configuration is required. The extension works out of the box.
 
-## Release Notes
+## Development
 
-Users appreciate release notes as you update your extension.
+If you would like to contribute to this extension, follow these steps:
 
-### 1.0.0
+1. Clone the repository.
+2. Install the dependencies using `npm install`.
+3. Open the project in Visual Studio Code.
+4. Press `F5` to start debugging the extension.
 
-Initial release of ...
+### Running Tests
 
-### 1.0.1
+Run the tests using the following command:
 
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+```bash
+npm test

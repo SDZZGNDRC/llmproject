@@ -1,36 +1,58 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
+const path = require('path');
 
 // This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-
-/**
- * @param {vscode.ExtensionContext} context
- */
 function activate(context) {
+    console.log('Congratulations, your extension "llmproject" is now active!');
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "llmproject" is now active!');
+    const disposable = vscode.commands.registerCommand('llmproject.copyFilePathAndContent', async (uri) => {
+        // 如果没有传递 uri 参数，则尝试从活动编辑器中获取
+        if (!uri) {
+			if (!vscode.window.activeTextEditor) {
+				return;
+			}
+            uri = vscode.window.activeTextEditor.document.uri;
+        }
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('llmproject.helloWorld', function () {
-		// The code you place here will be executed every time your command is executed
+        if (uri && uri.scheme === 'file') {
+            const filePath = uri.fsPath;
+            const relativePath = path.relative(vscode.workspace.rootPath || '', filePath);
+            const fileExtension = path.extname(filePath).slice(1); // 获取文件扩展名并去除开头的点
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from LLMProject!');
-	});
+            try {
+                // 读取文件内容
+                const fileContent = await vscode.workspace.fs.readFile(uri);
+                const content = fileContent.toString();
 
-	context.subscriptions.push(disposable);
+                // 根据文件扩展名选择对应的Markdown代码块
+                let codeBlock = '';
+                if (fileExtension) {
+                    codeBlock = `\`\`\`${fileExtension}\n${content}\n\`\`\``; // 使用代码块
+                } else {
+                    codeBlock = content; // 如果没有扩展名，直接使用内容
+                }
+
+                // 组合路径和内容
+                const clipboardContent = `相对路径: ${relativePath}:\n${codeBlock}\n`;
+                
+                // 将内容写入剪贴板
+                await vscode.env.clipboard.writeText(clipboardContent);
+                vscode.window.showInformationMessage('文件路径和内容已复制到剪贴板');
+            } catch (error) {
+                vscode.window.showErrorMessage('读取文件内容失败: ' + error.message);
+            }
+        } else {
+            vscode.window.showErrorMessage('无法获取文件路径，请确保在编辑器中打开了一个文件或从资源管理器中右键点击文件。');
+        }
+    });
+
+    context.subscriptions.push(disposable);
 }
 
 // This method is called when your extension is deactivated
 function deactivate() {}
 
 module.exports = {
-	activate,
-	deactivate
+    activate,
+    deactivate
 }
