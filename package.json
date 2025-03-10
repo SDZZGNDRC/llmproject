@@ -16,6 +16,38 @@
       {
         "command": "llmproject.copyFilePathAndContent",
         "title": "Copy File Path and Content"
+      },
+      {
+        "command": "llmproject.createContext",
+        "title": "创建新的 LLM Context"
+      },
+      {
+        "command": "llmproject.deleteContext",
+        "title": "删除 LLM Context"
+      },
+      {
+        "command": "llmproject.renameContext",
+        "title": "重命名 LLM Context"
+      },
+      {
+        "command": "llmproject.editContextDescription",
+        "title": "编辑 Context 描述"
+      },
+      {
+        "command": "llmproject.addFileToContext",
+        "title": "添加文件到 Context"
+      },
+      {
+        "command": "llmproject.addFolderToContext",
+        "title": "添加文件夹到 Context"
+      },
+      {
+        "command": "llmproject.removeFileFromContext",
+        "title": "从 Context 中移除文件"
+      },
+      {
+        "command": "llmproject.exportContext",
+        "title": "导出 Context 到剪贴板"
       }
     ],
     "keybindings": [
@@ -23,6 +55,11 @@
         "command": "llmproject.copyFilePathAndContent",
         "key": "ctrl+shift+c",
         "when": "editorTextFocus"
+      },
+      {
+        "command": "llmproject.exportContext",
+        "key": "ctrl+shift+e",
+        "when": "llmContextViewFocus"
       }
     ],
     "menus": {
@@ -31,6 +68,53 @@
           "command": "llmproject.copyFilePathAndContent",
           "when": "resourceScheme == 'file'",
           "group": "9_cutcopypaste"
+        },
+        {
+          "command": "llmproject.addFileToContext",
+          "when": "resourceScheme == 'file'",
+          "group": "7_modification"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "llmproject.createContext",
+          "when": "view == llmContextView",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "llmproject.deleteContext",
+          "when": "view == llmContextView && viewItem == context",
+          "group": "inline"
+        },
+        {
+          "command": "llmproject.renameContext",
+          "when": "view == llmContextView && viewItem == context",
+          "group": "1_modification"
+        },
+        {
+          "command": "llmproject.editContextDescription",
+          "when": "view == llmContextView && viewItem == context",
+          "group": "1_modification"
+        },
+        {
+          "command": "llmproject.exportContext",
+          "when": "view == llmContextView && viewItem == context",
+          "group": "2_export"
+        },
+        {
+          "command": "llmproject.removeFileFromContext",
+          "when": "view == llmContextView && viewItem == contextFile",
+          "group": "inline"
+        }
+      ]
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "llmContextView",
+          "name": "LLM Contexts"
         }
       ]
     }
@@ -41,12 +125,15 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.91.0",
     "@types/mocha": "^10.0.7",
     "@types/node": "20.x",
-    "eslint": "^8.57.0",
-    "typescript": "^5.4.5",
+    "@types/vscode": "^1.91.0",
     "@vscode/test-cli": "^0.0.9",
-    "@vscode/test-electron": "^2.4.0"
+    "@vscode/test-electron": "^2.4.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "uuid": "^11.1.0"
   }
 }
