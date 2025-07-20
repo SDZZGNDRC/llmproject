@@ -1,5 +1,6 @@
 const vscode = require('vscode');
 const path = require('path');
+const fs = require('fs');
 const contextManager = require('./contextManager');
 const ContextTreeDataProvider = require('./contextTreeView');
 
@@ -233,8 +234,119 @@ function activate(context) {
         }
     });
 
+    // 注册收集项目上下文命令
+    const collectProjectContextDisposable = vscode.commands.registerCommand('llmproject.collectProjectContext', async () => {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders) {
+            vscode.window.showErrorMessage('请先打开一个项目文件夹。');
+            return;
+        }
+        const rootPath = workspaceFolders[0].uri.fsPath;
+
+        vscode.window.showInformationMessage('正在收集项目上下文...');
+
+        try {
+            // 1. 读取 .ignore 文件
+            const ignorePath = path.join(rootPath, '.llmproject', '.ignore');
+            let ignorePatterns = [];
+            if (fs.existsSync(ignorePath)) {
+                const ignoreContent = fs.readFileSync(ignorePath, 'utf-8');
+                ignorePatterns = ignoreContent.split(/\r?\n/).filter(line => line.trim() !== '' && !line.startsWith('#'));
+            }
+
+            // 辅助函数：检查路径是否应该被忽略
+            const isIgnored = (filePath) => {
+                const relativePath = path.relative(rootPath, filePath);
+                // 始终忽略 .git 和 .llmproject 文件夹
+                if (relativePath.startsWith('.git') || relativePath.startsWith('.llmproject')) {
+                    return true;
+                }
+                for (const pattern of ignorePatterns) {
+                    // 简单的匹配逻辑：检查路径是否以 pattern 结尾或包含 pattern
+                    // 注意：这是一个简化的实现，不支持完整的 .gitignore 语法
+                    if (relativePath.includes(pattern)) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            // 2. 获取项目结构和文件内容
+            let projectStructure = '';
+            const allFileContents = [];
+
+            const traverseDir = (dir, prefix = '') => {
+                const files = fs.readdirSync(dir);
+                files.forEach((file, index) => {
+                    const fullPath = path.join(dir, file);
+                    if (isIgnored(fullPath)) {
+                        return;
+                    }
+
+                    const isLast = index === files.length - 1;
+                    projectStructure += `${prefix}${isLast ? '└── ' : '├── '}${file}\n`;
+
+                    const stat = fs.statSync(fullPath);
+                    if (stat.isDirectory()) {
+                        traverseDir(fullPath, `${prefix}${isLast ? '    ' : '│   '}`);
+                    } else {
+                        const relativePath = path.relative(rootPath, fullPath);
+                        const content = fs.readFileSync(fullPath, 'utf-8');
+                        const fileExtension = path.extname(fullPath).slice(1);
+                        const codeBlock = `\n\`\`\`${fileExtension}\n${content}\n\`\`\``;
+                        allFileContents.push(`文件路径: ${relativePath}:${codeBlock}`);
+                    }
+                });
+            };
+
+            projectStructure = `项目结构:\n\`\`\`\n${rootPath.split(path.sep).pop()}\n`;
+            traverseDir(rootPath);
+            projectStructure += '```\n';
+
+            try {
+                // 3. 拼接所有内容并复制
+                const finalContent = projectStructure + '\n' + allFileContents.join('\n\n');
+                await vscode.env.clipboard.writeText(finalContent);
+                vscode.window.showInformationMessage('项目上下文已成功收集并复制到剪贴板！');
+            } catch (e) {
+                if (e instanceof RangeError) {
+                    vscode.window.showWarningMessage('内容过大无法复制到剪贴板，将保存到文件中。');
+                    const outputPath = path.join(rootPath, 'project_context.txt');
+                    try {
+                        const stream = fs.createWriteStream(outputPath);
+                        stream.on('error', (writeError) => {
+                            console.error('文件写入时出错:', writeError);
+                            vscode.window.showErrorMessage('保存文件时出错: ' + writeError.message);
+                        });
+                        
+                        stream.write(projectStructure + '\n');
+                        allFileContents.forEach(content => {
+                            stream.write(content + '\n\n');
+                        });
+                        stream.end();
+
+                        stream.on('finish', () => {
+                            vscode.window.showInformationMessage(`内容已保存到文件: ${outputPath}`);
+                        });
+                    } catch (fileError) {
+                        console.error('创建文件流时出错:', fileError);
+                        vscode.window.showErrorMessage('创建文件以保存上下文时出错: ' + fileError.message);
+                    }
+                } else {
+                    // 重新抛出未预料到的错误
+                    console.error('收集项目上下文时发生未知错误:', e);
+                    vscode.window.showErrorMessage('收集项目上下文时出错: ' + e.message);
+                }
+            }
+        } catch (error) {
+            console.error('遍历目录或读取文件时出错:', error);
+            vscode.window.showErrorMessage('收集项目上下文时出错: ' + error.message);
+        }
+    });
+
     // 注册所有命令
     context.subscriptions.push(
+        collectProjectContextDisposable,
         copyFilePathAndContentDisposable,
         createContextDisposable,
         deleteContextDisposable,

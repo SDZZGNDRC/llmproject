@@ -48,6 +48,10 @@
       {
         "command": "llmproject.exportContext",
         "title": "导出 Context 到剪贴板"
+      },
+      {
+        "command": "llmproject.collectProjectContext",
+        "title": "收集项目上下文到剪贴板"
       }
     ],
     "keybindings": [
